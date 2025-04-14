@@ -4,3 +4,4 @@ class Client:
         self.name = name
         self.pesel = pesel
         self.accounts = accounts
+
