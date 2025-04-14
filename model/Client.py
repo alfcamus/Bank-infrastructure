@@ -5,3 +5,5 @@ class Client:
         self.pesel = pesel
         self.accounts = accounts
 
+    def to_dict(self):
+        return {'name': self.name, "id": self.id, "pesel": self.pesel}
