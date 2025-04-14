@@ -1,5 +1,5 @@
 from service.BaseService import BaseService
-
+from model.Client import Client
 
 class ClientService(BaseService):
     def __init__(self):
@@ -8,7 +8,9 @@ class ClientService(BaseService):
     def get_client(self, id):
         query = f"SELECT * FROM clients WHERE id = {id}"
         # todo: return Client.py model client
-        return super().db.execute_read_query(query)
+        querry_result = self.db.execute_read_query(query)[0]
+        client = Client(querry_result["id"], querry_result["name"], querry_result["pesel"], None) 
+        return client
 
     def add_client(self):
         raise NotImplementedError()

@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 from functools import wraps
+from service.ClientService import ClientService
 import logging
-
+import json
 # Initialize Flask app
 app = Flask(__name__)
-
+client_service = ClientService()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,25 +44,27 @@ def health_check():
 # Example CRUD endpoint
 @app.route('/api/clients/client', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
-def items(item_id):
+def clients():
     """Example endpoint with multiple methods"""
     if request.method == 'GET':
-        # Retrieve item logic
-        return {'item_id': item_id, 'method': 'GET'}
+        # Retrieve item 
+        client_id = request.args.get('id')
+        client = client_service.get_client(client_id)
+        return {'client': client.to_dict(), 'method': 'GET'}
 
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
-        return {'item_id': item_id, 'data': data, 'method': 'POST'}
+        return {'item_id': client_id, 'data': data, 'method': 'POST'}
 
     elif request.method == 'PUT':
         # Update item logic
         data = request.get_json()
-        return {'item_id': item_id, 'data': data, 'method': 'PUT'}
+        return {'item_id': client_id, 'data': data, 'method': 'PUT'}
 
     elif request.method == 'DELETE':
         # Delete item logic
-        return {'item_id': item_id, 'method': 'DELETE'}
+        return {'item_id': client_id, 'method': 'DELETE'}
 
 
 # Error handler
