@@ -10,9 +10,13 @@
 ## Database
 
 ```commandline
- podman run --name bank_app -e MYSQL_ROOT_PASSWORD=password -d mysql
+podman run --name bank_app -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql
 ```
 In mysql shell:
 ```commandline
- \connect root:password@localhost:3306
+\connect root:password@localhost:3306
+```
+or in powershell
+```commandline
+mysqlsh
 ```

@@ -8,3 +8,6 @@ class ClientService(BaseService):
     def get_client(self, id):
         query = f"SELECT * FROM clients WHERE id = {id}"
         return super().db.execute_read_query(query)
+
+    def add_client(self):
+        raise NotImplementedError()

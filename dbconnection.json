@@ -1,6 +1,6 @@
 {
   "host": "localhost",
-  "database": "bank",
+  "database": "bank_app",
   "user": "root",
   "password": "password",
   "port": 3306
