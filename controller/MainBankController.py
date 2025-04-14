@@ -38,8 +38,10 @@ def health_check():
     return {'status': 'healthy', 'version': '1.0.0'}
 
 
+# todo: add client logic
+
 # Example CRUD endpoint
-@app.route('/api/items/<item_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/api/clients/client', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
 def items(item_id):
     """Example endpoint with multiple methods"""
