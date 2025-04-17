@@ -6,4 +6,7 @@ class Client:
         self.accounts = accounts
 
     def to_dict(self):
-        return {'name': self.name, "id": self.id, "pesel": self.pesel}
+        return {'name': self.name, "id": self.id, "pesel": self.pesel, "accounts": self.accounts}
+    
+    def to_db(self):
+        return {'name': self.name, "pesel": self.pesel}
