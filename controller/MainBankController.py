@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify
 from functools import wraps
 from service.ClientService import ClientService
+from service.AccountService import AccountService
 import logging
-import json
+from model.Account import Account
+from model.Client import Client
 # Initialize Flask app
 app = Flask(__name__)
 client_service = ClientService()
+account_service = AccountService()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,6 +39,7 @@ def json_api(f):
 @json_api
 def health_check():
     """Simple health check endpoint"""
+    client_service.add_client({'name': "Artur", "pesel": "12345678913"})
     return {'status': 'healthy', 'version': '1.0.0'}
 
 
@@ -55,7 +59,8 @@ def clients():
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
-        return {'item_id': client_id, 'data': data, 'method': 'POST'}
+        client = Client(None, data["name"], data["pesel"], None)
+        client_service.add_client(client)
 
     elif request.method == 'PUT':
         # Update item logic
@@ -65,6 +70,31 @@ def clients():
     elif request.method == 'DELETE':
         # Delete item logic
         return {'item_id': client_id, 'method': 'DELETE'}
+    
+@app.route('/api/accounts/account', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@json_api
+def accounts():
+    """Example endpoint with multiple methods"""
+    if request.method == 'GET':
+        # Retrieve item 
+        client_id = request.args.get('client_id')
+        account = account_service.get_account_by_client_id(client_id)
+        return {'account': account.to_dict(), 'method': 'GET'}
+
+    elif request.method == 'POST':
+        # Create item logic
+        data = request.get_json()
+        account = Account(data["client_id"], None, data["balance"], data["account_type"], None)
+        account_service.add_account(account)
+
+    elif request.method == 'PUT':
+        # Update item logic
+        data = request.get_json()
+        return {'item_id': client_id, 'data': data, 'method': 'PUT'}
+
+    elif request.method == 'DELETE':
+        account_id = request.args.get('id')
+        account_service.delete_account(account_id)
 
 
 # Error handler
