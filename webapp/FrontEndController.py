@@ -8,11 +8,26 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+@front_app.route('/base')
+def base_page():
+    return render_template('base.html'), 200
+
+
+@front_app.route('/login')
+def login():
+    return render_template('login.html'), 200
+
+
+@front_app.route('/registration')
+def registration():
+    return render_template('registration.html'), 200
+
+
 # Error handler
 @front_app.errorhandler(404)
 def not_found(error):
-    return render_template('404.html'), 404
+    return render_template('not_found.html'), 404
 
 
 if __name__ == '__main__':
-    front_app.run(host='0.0.0.0', port=3000, debug=True)
+    front_app.run(host='0.0.0.0', port=3001, debug=True)

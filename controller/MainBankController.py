@@ -13,7 +13,9 @@ account_service = AccountService()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+# TODO for frontend app: add simple authentication in backend ->
+# use sha-256 to hash password on registration
+# main id: client id, but for purpose of registration generate login
 # Helper decorator for JSON APIs
 def json_api(f):
     @wraps(f)
@@ -101,7 +103,6 @@ def accounts():
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'success': False, 'error': 'Not found'}), 404
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
