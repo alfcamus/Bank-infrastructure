@@ -1,4 +1,5 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+import requests
 import logging
 
 # Initialize Flask app
@@ -22,6 +23,14 @@ def login():
 def registration():
     return render_template('registration.html'), 200
 
+@front_app.route('/register', methods = ["POST"])
+def register():
+    accepted_data = request.get_json()
+    host = "http://localhost:5000/api/clients/client"
+    response = requests.post(
+    host,
+    json=accepted_data)
+    return response
 
 # Error handler
 @front_app.errorhandler(404)
