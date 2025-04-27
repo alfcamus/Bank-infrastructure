@@ -50,6 +50,7 @@ def health_check():
 
 # todo: add client logic
 
+
 # Example CRUD endpoint
 @app.route('/api/clients/client', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
@@ -64,7 +65,7 @@ def clients():
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
-        client = Client(None, data["name"], data["pesel"], None)
+        client = Client(None, data["name"], data["surname"], data["pesel"], None, data["password"])
         client_service.add_client(client)
 
     elif request.method == 'PUT':
@@ -117,8 +118,6 @@ def transactions():
         data = request.get_json()
         transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
-
-
 # Error handler
 @app.errorhandler(404)
 def not_found(error):

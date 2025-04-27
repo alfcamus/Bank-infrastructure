@@ -6,7 +6,10 @@ USE bank_infrastructure;
 CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
     pesel CHAR(11) UNIQUE NOT NULL,
+    login CHAR(7) NOT NULL UNIQUE,
+    password VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -36,10 +39,3 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_source_account ON transactions(source_account);
 
 CREATE INDEX idx_accounts_client_id ON accounts(client_id);
-
-CREATE INDEX idx_accounts_client_id ON accounts(client_id);
-
-ALTER TABLE clients
-ADD login varchar(7) NOT NULL;
-ALTER TABLE clients
-ADD UNIQUE (login);
