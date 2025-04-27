@@ -22,3 +22,8 @@ CREATE TABLE accounts (
 );
 
 CREATE INDEX idx_accounts_client_id ON accounts(client_id);
+
+ALTER TABLE clients
+ADD login varchar(7) NOT NULL;
+ALTER TABLE clients
+ADD UNIQUE (login);
