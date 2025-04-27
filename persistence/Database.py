@@ -81,8 +81,7 @@ class Database:
             self.connection.close()
             self.logger.info("Database connection closed")
 
-    def execute_query(self, query: str, params: Optional[tuple] = None,
-                      multi: bool = False) -> Optional[int]:
+    def execute_query(self, query: str, params: Optional[tuple] = None) -> Optional[int]:
         """
         Execute a SQL query (INSERT, UPDATE, DELETE).
 
@@ -100,7 +99,7 @@ class Database:
                 self.connect()
 
             cursor = self.connection.cursor()
-            cursor.execute(query, params, multi=multi)
+            cursor.execute(query, params)
             self.connection.commit()
             affected_rows = cursor.rowcount
             self.logger.debug(f"Query executed successfully. Affected rows: {affected_rows}")

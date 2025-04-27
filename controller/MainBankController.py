@@ -2,13 +2,16 @@ from flask import Flask, request, jsonify
 from functools import wraps
 from service.ClientService import ClientService
 from service.AccountService import AccountService
+from service.TransactionService import TransactionService
 import logging
 from model.Account import Account
 from model.Client import Client
+from model.Transaction import Transaction
 # Initialize Flask app
 app = Flask(__name__)
-client_service = ClientService()
 account_service = AccountService()
+client_service = ClientService(account_service)
+transaction_service = TransactionService()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,10 +69,11 @@ def clients():
         # Update item logic
         data = request.get_json()
         return {'item_id': client_id, 'data': data, 'method': 'PUT'}
-
+    
     elif request.method == 'DELETE':
-        # Delete item logic
-        return {'item_id': client_id, 'method': 'DELETE'}
+        client_id = request.args.get('id')
+        client_service.delete_client(client_id)
+
     
 @app.route('/api/accounts/account', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
@@ -78,7 +82,7 @@ def accounts():
     if request.method == 'GET':
         # Retrieve item 
         client_id = request.args.get('client_id')
-        account = account_service.get_account_by_client_id(client_id)
+        account = account_service.get_accounts_by_client_id(client_id)
         return {'account': account.to_dict(), 'method': 'GET'}
 
     elif request.method == 'POST':
@@ -95,6 +99,22 @@ def accounts():
     elif request.method == 'DELETE':
         account_id = request.args.get('id')
         account_service.delete_account(account_id)
+
+@app.route('/api/transactions/transaction', methods=['GET', 'POST'])
+@json_api
+def transactions():
+    """Example endpoint with multiple methods"""
+    if request.method == 'GET':
+        # Retrieve item 
+        transaction_id = request.args.get('id')
+        transaction = transaction_service.get_transaction_by_id(transaction_id)
+        return {'account': transaction.to_dict(), 'method': 'GET'}
+
+    elif request.method == 'POST':
+        # Create item logic
+        data = request.get_json()
+        transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
+        transaction_service.add_transaction(transaction)
 
 
 # Error handler

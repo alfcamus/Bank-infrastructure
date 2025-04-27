@@ -21,4 +21,17 @@ CREATE TABLE accounts (
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
+-- Transactions table
+CREATE TABLE transactions (
+    transaction_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    source_account CHAR(36) NOT NULL,
+    value DECIMAL(15,2) NOT NULL,
+    transfer_type ENUM('DEBIT', 'CREDIT') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (source_account) REFERENCES accounts(account_id)
+);
+
+-- Index for faster lookups by source account
+CREATE INDEX idx_transactions_source_account ON transactions(source_account);
+
 CREATE INDEX idx_accounts_client_id ON accounts(client_id);
