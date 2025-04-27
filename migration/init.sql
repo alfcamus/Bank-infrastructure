@@ -21,6 +21,7 @@ CREATE TABLE accounts (
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
+
 -- Transactions table
 CREATE TABLE transactions (
     transaction_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
@@ -35,3 +36,10 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_source_account ON transactions(source_account);
 
 CREATE INDEX idx_accounts_client_id ON accounts(client_id);
+
+CREATE INDEX idx_accounts_client_id ON accounts(client_id);
+
+ALTER TABLE clients
+ADD login varchar(7) NOT NULL;
+ALTER TABLE clients
+ADD UNIQUE (login);
