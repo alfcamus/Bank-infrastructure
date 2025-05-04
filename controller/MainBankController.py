@@ -7,6 +7,7 @@ import logging
 from model.Account import Account
 from model.Client import Client
 from model.Transaction import Transaction
+
 # Initialize Flask app
 app = Flask(__name__)
 account_service = AccountService()
@@ -15,6 +16,7 @@ transaction_service = TransactionService()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # TODO for frontend app: add simple authentication in backend ->
 # use sha-256 to hash password on registration
@@ -44,7 +46,6 @@ def json_api(f):
 @json_api
 def health_check():
     """Simple health check endpoint"""
-    client_service.add_client({'name': "Artur", "pesel": "12345678913"})
     return {'status': 'healthy', 'version': '1.0.0'}
 
 
@@ -65,19 +66,19 @@ def clients():
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
-        client = Client(None, data["name"], data["surname"], data["pesel"], None, data["password"])
+        client = Client(None, data["name"], data["surname"], data["pesel"], None, None, data["password"])
         client_service.add_client(client)
 
     elif request.method == 'PUT':
         # Update item logic
         data = request.get_json()
         return {'item_id': client_id, 'data': data, 'method': 'PUT'}
-    
+
     elif request.method == 'DELETE':
         client_id = request.args.get('id')
         client_service.delete_client(client_id)
 
-    
+
 @app.route('/api/accounts/account', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
 def accounts():
@@ -103,6 +104,7 @@ def accounts():
         account_id = request.args.get('id')
         account_service.delete_account(account_id)
 
+
 @app.route('/api/transactions/transaction', methods=['GET', 'POST'])
 @json_api
 def transactions():
@@ -118,10 +120,18 @@ def transactions():
         data = request.get_json()
         transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
+
+
 # Error handler
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'success': False, 'error': 'Not found'}), 404
+
+
+@app.errorhandler(500)
+def not_found(error):
+    return jsonify({'success': False, 'error': 'Not found'}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

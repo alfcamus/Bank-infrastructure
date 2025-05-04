@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, jsonify
 import requests
 import logging
 
@@ -9,9 +9,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@front_app.route('/base')
-def base_page():
-    return render_template('base.html'), 200
+@front_app.route('/')
+@front_app.route('/home')
+def home():
+    return render_template('home.html'), 200
+
+
+@front_app.route('/logged')
+def logged():
+    return render_template('logged.html'), 200
 
 
 @front_app.route('/login')
@@ -23,19 +29,36 @@ def login():
 def registration():
     return render_template('registration.html'), 200
 
-@front_app.route('/register', methods = ["POST"])
+
+@front_app.route('/register', methods=["POST"])
 def register():
-    accepted_data = request.get_json()
-    host = "http://localhost:5000/api/clients/client"
-    response = requests.post(
-    host,
-    json=accepted_data)
-    return response
+    try:
+        accepted_data = request.get_json()
+        host = "http://localhost:5000/api/clients/client"
+        response = requests.post(
+            host,
+            json=accepted_data)
+        if response.ok:
+            return jsonify({
+                "status": "success",
+                "redirect_url": url_for('logged')
+            }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 
 # Error handler
 @front_app.errorhandler(404)
 def not_found(error):
     return render_template('not_found.html'), 404
+
+
+@front_app.errorhandler(500)
+def server_error(error):
+    return render_template('error.html'), 500
 
 
 if __name__ == '__main__':
