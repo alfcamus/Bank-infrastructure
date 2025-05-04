@@ -46,10 +46,31 @@
                     <a class="nav-link disabled">Disabled</a>
                 </li>
             </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Register</button>
+            <form id = "login_form" class="d-flex" role="form">
+                <!-- Username/Email Field -->
+                <div class="me-2">
+                    <input class="form-control" 
+                            id="login"
+                           type="text" 
+                           name="login" 
+                           placeholder="Login" 
+                           aria-label="Login"
+                           required>
+                </div>
+                
+                <!-- Password Field -->
+                <div class="me-2">
+                    <input class="form-control" 
+                            id="password"
+                           type="password" 
+                           name="password" 
+                           placeholder="Password" 
+                           aria-label="Password"
+                           required>
+                </div>
+                
+                <!-- Submit Button -->
+                <button class="btn btn-outline-success" type="submit">Login</button>
             </form>
         </div>
     </div>
@@ -76,6 +97,62 @@
         crossorigin="anonymous">
 
 </script>
-<script src="main.js"></script>
+<script>
+
+    async function sha256(message) {
+        // Encode the message as UTF-8
+        const msgBuffer = new TextEncoder().encode(message);
+
+        // Hash the message
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+        // Convert the ArrayBuffer to byte array
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+        // Convert bytes to hex string
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        return hashHex;
+    }
+
+    document.getElementById('login_form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Get form values
+        const login = document.getElementById('login').value;
+        const password = document.getElementById('password').value;
+
+
+        try {
+            // Hash the password
+            const hashedPassword = await sha256(password);
+
+            // Prepare data to send
+            const formData = {
+                login: login,
+                password: hashedPassword
+            };
+
+            // Send to Flask backend
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.redirect_url) {
+                window.location.href = result.redirect_url;  // Perform redirect
+            } else {
+                alert('Error: ' + (result.message || 'Registration failed'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+</script>
 </body>
 </html>
