@@ -63,6 +63,13 @@ def clients():
         client = client_service.get_client(client_id)
         return {'client': client.to_dict(), 'method': 'GET'}
 
+    elif request.method == "POST" and request.args.get("check_password"):
+        data = request.get_json()
+        if client_service.check_password(data ["login"], data ["password"]):
+            return {"success": "True"}
+        else:
+            return {"success": "False"}
+        
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()

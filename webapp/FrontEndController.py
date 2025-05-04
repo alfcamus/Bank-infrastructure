@@ -20,10 +20,29 @@ def logged():
     return render_template('logged.html'), 200
 
 
-@front_app.route('/login')
+@front_app.route('/login', methods = ['POST'])
 def login():
-    return render_template('login.html'), 200
-
+        login_from_data = request.get_json()['login']
+        password_from_data = request.get_json()['password']
+        print(f'{login_from_data}, {password_from_data}')
+        try:
+            host = "http://localhost:5000/api/clients/client?check_password=True"
+            response = requests.post(
+            host,
+            json={"login": login_from_data, "password": password_from_data}
+            )
+            if response.ok:
+                return jsonify({
+                "status": "success",
+                "redirect_url": url_for('logged')
+                }), 200
+        except Exception as e:
+            return jsonify({
+            "status": "error",
+            "message": str(e)
+            }), 500
+        
+    
 
 @front_app.route('/registration')
 def registration():

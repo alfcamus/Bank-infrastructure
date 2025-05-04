@@ -9,9 +9,9 @@ class ClientService(BaseService):
         self.account_service = account_service
 
     def get_client(self, id):
-        query = f"SELECT * FROM clients WHERE id = {id}"
+        querry = f"SELECT * FROM clients WHERE id = {id}"
         # todo: return Client.py model client
-        querry_result = self.db.execute_read_query(query)[0]
+        querry_result = self.db.execute_read_query(querry)[0]
         query_account = self.account_service.get_accounts_by_client_id(id)
         client = Client(querry_result["id"], querry_result["name"], querry_result["pesel"], query_account,
                         querry_result["login"])
@@ -28,3 +28,12 @@ class ClientService(BaseService):
     def delete_client(self, client_id):
         query = f"DELETE FROM clients WHERE id = '{client_id}'"
         self.db.execute_query(query)
+
+    def check_password(self, client_login, client_password):
+        query = f"SELECT * FROM clients WHERE login = '{client_login}'"
+        query_result = self.db.execute_read_query(query)[0]
+        password_result = query_result["password"]
+        if password_result == client_password:
+            return True
+        else:
+            return False
