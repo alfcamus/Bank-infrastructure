@@ -17,9 +17,14 @@ def home():
 
 @front_app.route('/logged')
 def logged():
-    # TODO
-    # request to backend (MainBankController) for client details (incl. accounts) and then create list of accounts and login and name to render template
-    return render_template('logged.html'), 200
+    login = request.args.get("login")
+    host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
+    response = requests.get(host)
+    accounts = response.json()['data']['client']['accounts']
+    user = {
+        "username": response.json()['data']['client']['name']
+    }
+    return render_template('logged.html', accounts = accounts, user = user), 200
 
 
 @front_app.route('/login', methods=['POST'])
@@ -36,7 +41,7 @@ def login():
         if response.ok:
             return jsonify({
                 "status": "success",
-                "redirect_url": url_for('logged')
+                "redirect_url": url_for('logged', login = login_from_data)
             }), 200
     except Exception as e:
         return jsonify({
