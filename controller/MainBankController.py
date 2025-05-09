@@ -65,7 +65,10 @@ def clients():
 
     elif request.method == "POST" and request.args.get("check_password"):
         data = request.get_json()
-        if client_service.check_password(data ["login"], data ["password"]):
+        # TODO
+        # check password, then if incorrect return { login: null, success: False }
+        # if correct then { login: client_service.get_login(), success: True }
+        if client_service.check_password(data["login"], data["password"]):
             return {"success": "True"}
         else:
             return {"success": "False"}

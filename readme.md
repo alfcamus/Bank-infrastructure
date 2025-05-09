@@ -11,6 +11,10 @@
 
 ```powershell
 podman machine stop;podman machine start;
+podman start bank_app;
+```
+or with migration of db schemas:
+```powershell
 podman rm bank_app;
 podman run --name bank_app -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql
 ```

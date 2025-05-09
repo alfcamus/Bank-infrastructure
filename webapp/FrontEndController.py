@@ -17,32 +17,33 @@ def home():
 
 @front_app.route('/logged')
 def logged():
+    # TODO
+    # request to backend (MainBankController) for client details (incl. accounts) and then create list of accounts and login and name to render template
     return render_template('logged.html'), 200
 
 
-@front_app.route('/login', methods = ['POST'])
+@front_app.route('/login', methods=['POST'])
 def login():
-        login_from_data = request.get_json()['login']
-        password_from_data = request.get_json()['password']
-        print(f'{login_from_data}, {password_from_data}')
-        try:
-            host = "http://localhost:5000/api/clients/client?check_password=True"
-            response = requests.post(
+    login_from_data = request.get_json()['login']
+    password_from_data = request.get_json()['password']
+    print(f'{login_from_data}, {password_from_data}')
+    try:
+        host = "http://localhost:5000/api/clients/client?check_password=True"
+        response = requests.post(
             host,
             json={"login": login_from_data, "password": password_from_data}
-            )
-            if response.ok:
-                return jsonify({
+        )
+        if response.ok:
+            return jsonify({
                 "status": "success",
                 "redirect_url": url_for('logged')
-                }), 200
-        except Exception as e:
-            return jsonify({
+            }), 200
+    except Exception as e:
+        return jsonify({
             "status": "error",
             "message": str(e)
-            }), 500
-        
-    
+        }), 500
+
 
 @front_app.route('/registration')
 def registration():
@@ -61,6 +62,8 @@ def register():
             return jsonify({
                 "status": "success",
                 "redirect_url": url_for('logged')
+                # TODO: retrieve login from response and send to 'frontend'
+                # login: ...
             }), 200
     except Exception as e:
         return jsonify({
