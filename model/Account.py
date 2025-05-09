@@ -1,5 +1,5 @@
 class Account:
-    def __init__(self, client_id, id: str, balance: float, account_type, created_at):
+    def __init__(self, id: str, balance: float, account_type, created_at, client_id):
         self.id = id
         self.balance = balance
         self.account_type = account_type

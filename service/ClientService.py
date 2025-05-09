@@ -12,10 +12,16 @@ class ClientService(BaseService):
         querry = f"SELECT * FROM clients WHERE id = {id}"
         # todo: return Client.py model client
         querry_result = self.db.execute_read_query(querry)[0]
+        print(querry_result)
         query_account = self.account_service.get_accounts_by_client_id(id)
-        client = Client(querry_result["id"], querry_result["name"], querry_result["pesel"], query_account,
-                        querry_result["login"])
+        client = Client(querry_result["id"], querry_result["name"], querry_result["surname"], querry_result["pesel"], query_account,
+                        querry_result["login"], None)
         return client
+    
+    def get_client_by_login(self, login):
+        querry_for_id = f"SELECT * FROM clients WHERE login = '{login}'"
+        client_id = self.db.execute_read_query(querry_for_id)[0]["id"]
+        return self.get_client(client_id)
 
     def add_client(self, client: Client):
         login = self.create_login(client)
