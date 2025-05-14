@@ -22,7 +22,8 @@ def logged():
     response = requests.get(host)
     accounts = response.json()['data']['client']['accounts']
     user = {
-        "username": response.json()['data']['client']['name']
+        "username": response.json()['data']['client']['name'],
+        "login": response.json()['data']['client']['login']
     }
     return render_template('logged.html', accounts = accounts, user = user), 200
 
@@ -53,6 +54,56 @@ def login():
 @front_app.route('/registration')
 def registration():
     return render_template('registration.html'), 200
+
+@front_app.route('/new-account')
+def new_account():
+    try:
+        user = {
+            "login": request.get_json()['login']
+        }
+        if response.ok:
+            return jsonify({
+            "status": "success",
+            "redirect_url": url_for('logged')
+            # TODO: retrieve login from response and send to 'frontend'
+            # login: ...
+        }), 200
+    except Exception as e:
+        return jsonify({
+        "status": "error",
+        "message": str(e)
+    }), 500
+
+    return render_template('new_account.html', user = user), 200
+
+@front_app.route('/create-new-account')
+def create_new_account():
+    try:
+        accepted_data = request.get_json()
+        by_login_url = f"http://localhost:5000/api/clients/client?by_login=True&login={accepted_data['login']}"
+        response_client = requests.get(by_login_url)
+        id = response_client.json()['data']['client']['id']
+        host = "http://localhost:5000/api/accounts/account"
+        account_to_be_created = {
+            'account_type' : accepted_data['account_type'],
+            'id' : id,
+            'balance' : 0
+        }
+        response = requests.post(
+            host,
+            json=account_to_be_created)
+        if response.ok:
+            return jsonify({
+                "status": "success",
+                "redirect_url": url_for('logged')
+                # TODO: retrieve login from response and send to 'frontend'
+                # login: ...
+            }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 @front_app.route('/register', methods=["POST"])

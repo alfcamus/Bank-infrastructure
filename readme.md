@@ -21,6 +21,7 @@ podman run --name bank_app -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql
 In mysql shell:
 ```powershell
 \connect root:password@localhost:3306
+use bank_infrastructure;
 ```
 or in powershell
 ```powershell
@@ -31,6 +32,8 @@ mysqlsh
 
 ### Running backend
 ```powershell
+C:\progs\GettingStarted\Bank-infrastructure
+
 python -m controller.MainBankController
 ```
 
