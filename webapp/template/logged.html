@@ -18,7 +18,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">BankInf</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -41,10 +41,15 @@
                         <li><a class="dropdown-item">{{ account.account_type }}</a></li>
                         {% endfor %}
                         <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" id="account_form" href="{{ url_for('new_account') }}">
+                                <i class="bi bi-plus-circle me-2"></i> Create New Account
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled">Disabled</a>
+                    <a class="nav-link">{{user.login}}</a>
                 </li>
             </ul>
         </div>
@@ -71,6 +76,40 @@
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
         crossorigin="anonymous">
 
+</script>
+
+<script>
+    const create_account = async function (e) {
+            e.preventDefault();
+
+            try {
+            
+                // Prepare data to send
+                const formData = {
+                    login : '{{user.login}}'
+                };
+
+                // Send to Flask backend
+                const response = await fetch('/new_account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.redirect_url) {
+                    window.location.href = result.redirect_url; // Perform redirect
+                } else {
+                    alert('Error: ' + (result.message || 'Create account failed'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    document.getElementById('account_form').addEventListener('click', create_account);
 </script>
 </body>
 </html>

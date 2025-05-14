@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from functools import wraps
 from service.ClientService import ClientService
 from service.AccountService import AccountService
@@ -47,10 +47,6 @@ def json_api(f):
 def health_check():
     """Simple health check endpoint"""
     return {'status': 'healthy', 'version': '1.0.0'}
-
-
-# todo: add client logic
-
 
 # Example CRUD endpoint
 @app.route('/api/clients/client', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -102,28 +98,64 @@ def clients():
 @app.route('/api/accounts/account', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
 def accounts():
-    """Example endpoint with multiple methods"""
+    """Account management endpoint"""
     if request.method == 'GET':
-        # Retrieve item 
+        # Retrieve accounts for a client
         client_id = request.args.get('client_id')
-        account = account_service.get_accounts_by_client_id(client_id)
-        return {'account': account.to_dict(), 'method': 'GET'}
+        if not client_id:
+            return {'error': 'client_id parameter is required'}, 400
+            
+        accounts = account_service.get_accounts_by_client_id(client_id)
+        return {'accounts': [account.to_dict() for account in accounts]}
 
     elif request.method == 'POST':
-        # Create item logic
+        # Create new account
         data = request.get_json()
-        account = Account(data["client_id"], None, data["balance"], data["account_type"], None)
-        account_service.add_account(account)
+        try:
+            # Validate required fields
+            required_fields = ['client_id', 'account_type']
+            if not all(field in data for field in required_fields):
+                return {'error': f'Missing required fields: {required_fields}'}, 400
+                
+            # Set default balance if not provided
+            balance = float(data.get('balance', 0.0))
+            
+            # Create and add account
+            account = Account(
+                client_id=data['client_id'],
+                account_id=None,  # Let service generate ID
+                balance=balance,
+                account_type=data['account_type'],
+                currency=data.get('currency', 'USD')
+            )
+            
+            account_service.add_account(account)
+            
+            return {
+                'success': True,
+                'account_id': account.account_id,
+                'message': 'Account created successfully'
+            }
+            
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except Exception as e:
+            logger.error(f"Account creation error: {str(e)}")
+            return {'error': 'Failed to create account'}, 500
 
     elif request.method == 'PUT':
-        # Update item logic
+        # Update account logic
         data = request.get_json()
-        return {'item_id': client_id, 'data': data, 'method': 'PUT'}
+        # Implement your update logic here
+        return {'error': 'Not implemented'}, 501
 
     elif request.method == 'DELETE':
         account_id = request.args.get('id')
+        if not account_id:
+            return {'error': 'id parameter is required'}, 400
+            
         account_service.delete_account(account_id)
-
+        return {'success': True, 'message': 'Account deleted'}
 
 @app.route('/api/transactions/transaction', methods=['GET', 'POST'])
 @json_api
@@ -140,6 +172,11 @@ def transactions():
         data = request.get_json()
         transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
+
+@app.route('/create-account')
+def create_account_page():
+    """Render the account creation form page"""
+    return render_template('create_acc.html')
 
 
 # Error handler
