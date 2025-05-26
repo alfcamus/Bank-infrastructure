@@ -19,15 +19,25 @@ def home():
 
 @front_app.route('/logged')
 def logged():
-    login = request.args.get("login")
-    host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
-    client_response = requests.get(host)
-    accounts = client_response.json()['data']['client']['accounts']
-    user = {
-        "username": client_response.json()['data']['client']['name']
-    }
-    user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
-    return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_b64.decode('utf-8')), 200
+    user_token_based = request.cookies.get('user_token')
+    if user_token_based is None:
+        login = request.args.get("login")
+        host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
+        client_response = requests.get(host)
+        accounts = client_response.json()['data']['client']['accounts']
+        user = {
+            "username": client_response.json()['data']['client']['name']
+        }
+        user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
+        return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_b64.decode('utf-8')), 200
+    else:
+        user_token = base64.b64decode(user_token_based).decode('utf-8')
+        user_token_json = json.loads(user_token)
+        user = {
+            "username": user_token_json['data']['client']['name']
+        }
+        accounts = user_token_json['data']['client']['accounts']
+        return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_based), 200
 
 
 @front_app.route('/login', methods=['POST'])
@@ -57,39 +67,25 @@ def login():
 def registration():
     return render_template('registration.html'), 200
 
+
 @front_app.route('/new-account')
 def new_account():
-    try:
-        user = {
-            "login": request.get_json()['login']
-        }
-        if response.ok:
-            return jsonify({
-            "status": "success",
-            "redirect_url": url_for('logged')
-            # TODO: retrieve login from response and send to 'frontend'
-            # login: ...
-        }), 200
-    except Exception as e:
-        return jsonify({
-        "status": "error",
-        "message": str(e)
-    }), 500
+    return render_template('new_account.html'), 200
 
-    return render_template('new_account.html', user = user), 200
 
-@front_app.route('/create-new-account')
+@front_app.route('/create-new-account', methods=['POST'])
 def create_new_account():
     try:
         accepted_data = request.get_json()
+        print(json.dumps(accepted_data))
         by_login_url = f"http://localhost:5000/api/clients/client?by_login=True&login={accepted_data['login']}"
         response_client = requests.get(by_login_url)
         id = response_client.json()['data']['client']['id']
         host = "http://localhost:5000/api/accounts/account"
         account_to_be_created = {
-            'account_type' : accepted_data['account_type'],
-            'id' : id,
-            'balance' : 0
+            'account_type': accepted_data['account_type'],
+            'client_id': id,
+            'balance': 0
         }
         response = requests.post(
             host,
