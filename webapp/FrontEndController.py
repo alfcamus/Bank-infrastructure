@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, url_for, jsonify
 import requests
 import logging
+import base64
+import json
 
 # Initialize Flask app
 front_app = Flask(__name__, template_folder='template')
@@ -19,12 +21,13 @@ def home():
 def logged():
     login = request.args.get("login")
     host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
-    response = requests.get(host)
-    accounts = response.json()['data']['client']['accounts']
+    client_response = requests.get(host)
+    accounts = client_response.json()['data']['client']['accounts']
     user = {
-        "username": response.json()['data']['client']['name']
+        "username": client_response.json()['data']['client']['name']
     }
-    return render_template('logged.html', accounts = accounts, user = user), 200
+    user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
+    return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_b64.decode('utf-8')), 200
 
 
 @front_app.route('/login', methods=['POST'])
@@ -41,7 +44,7 @@ def login():
         if response.ok:
             return jsonify({
                 "status": "success",
-                "redirect_url": url_for('logged', login = login_from_data)
+                "redirect_url": url_for('logged', login=login_from_data)
             }), 200
     except Exception as e:
         return jsonify({

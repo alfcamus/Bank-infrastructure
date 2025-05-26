@@ -58,18 +58,16 @@ def health_check():
 def clients():
     """Example endpoint with multiple methods"""
     if request.method == 'GET' and request.args.get("by_login"):
-    # Retrieve item 
+        # Retrieve item
         client_login = request.args.get('login')
         client = client_service.get_client_by_login(client_login)
-        return {'client': client.to_dict(), 'method': 'GET'}    
+        return {'client': client.to_dict(), 'method': 'GET'}
 
     elif request.method == 'GET':
         # Retrieve item 
         client_id = request.args.get('id')
         client = client_service.get_client(client_id)
         return {'client': client.to_dict(), 'method': 'GET'}
-    
-    
 
     elif request.method == "POST" and request.args.get("check_password"):
         data = request.get_json()
@@ -82,14 +80,14 @@ def clients():
         else:
             return {"success": "False",
                     "login": None}
-        
+
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
         client = Client(None, data["name"], data["surname"], data["pesel"], None, None, data["password"])
         client_service.add_client(client)
         return {"success": "True",
-                "login" : client.login}
+                "login": client.login}
 
     elif request.method == 'PUT':
         # Update item logic
