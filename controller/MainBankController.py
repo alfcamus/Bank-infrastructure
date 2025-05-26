@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from functools import wraps
 from service.ClientService import ClientService
 from service.AccountService import AccountService
@@ -49,27 +49,22 @@ def health_check():
     return {'status': 'healthy', 'version': '1.0.0'}
 
 
-# todo: add client logic
-
-
 # Example CRUD endpoint
 @app.route('/api/clients/client', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
 def clients():
     """Example endpoint with multiple methods"""
     if request.method == 'GET' and request.args.get("by_login"):
-    # Retrieve item 
+        # Retrieve item
         client_login = request.args.get('login')
         client = client_service.get_client_by_login(client_login)
-        return {'client': client.to_dict(), 'method': 'GET'}    
+        return {'client': client.to_dict(), 'method': 'GET'}
 
     elif request.method == 'GET':
         # Retrieve item 
         client_id = request.args.get('id')
         client = client_service.get_client(client_id)
         return {'client': client.to_dict(), 'method': 'GET'}
-    
-    
 
     elif request.method == "POST" and request.args.get("check_password"):
         data = request.get_json()
@@ -82,14 +77,14 @@ def clients():
         else:
             return {"success": "False",
                     "login": None}
-        
+
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
         client = Client(None, data["name"], data["surname"], data["pesel"], None, None, data["password"])
         client_service.add_client(client)
         return {"success": "True",
-                "login" : client.login}
+                "login": client.login}
 
     elif request.method == 'PUT':
         # Update item logic
@@ -104,27 +99,58 @@ def clients():
 @app.route('/api/accounts/account', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @json_api
 def accounts():
-    """Example endpoint with multiple methods"""
+    """Account management endpoint"""
     if request.method == 'GET':
-        # Retrieve item 
+        # Retrieve accounts for a client
         client_id = request.args.get('client_id')
-        account = account_service.get_accounts_by_client_id(client_id)
-        return {'account': account.to_dict(), 'method': 'GET'}
+        if not client_id:
+            return {'error': 'client_id parameter is required'}, 400
+
+        accounts = account_service.get_accounts_by_client_id(client_id)
+        return {'accounts': [account.to_dict() for account in accounts]}
 
     elif request.method == 'POST':
-        # Create item logic
+        # Create new account
         data = request.get_json()
-        account = Account(data["client_id"], None, data["balance"], data["account_type"], None)
+        print("Trying to create a new account")
+        # Validate required fields
+        required_fields = ['client_id', 'account_type']
+        if not all(field in data for field in required_fields):
+            raise ValueError({'error': f'Missing required fields: {required_fields}'}, 400)
+
+        # Set default balance if not provided
+        balance = float(data.get('balance', 0.0))
+
+        # Create and add account
+        account = Account(
+            id=None,
+            created_at=None,
+            client_id=data['client_id'],
+            balance=balance,
+            account_type=data['account_type'],
+        )
+        print(f"account to create: {account.to_db()}")
         account_service.add_account(account)
 
+        return {
+            'success': True,
+            'account_id': account.id,
+            'message': 'Account created successfully'
+        }
+
     elif request.method == 'PUT':
-        # Update item logic
+        # Update account logic
         data = request.get_json()
-        return {'item_id': client_id, 'data': data, 'method': 'PUT'}
+        # Implement your update logic here
+        return {'error': 'Not implemented'}, 501
 
     elif request.method == 'DELETE':
         account_id = request.args.get('id')
+        if not account_id:
+            return {'error': 'id parameter is required'}, 400
+
         account_service.delete_account(account_id)
+        return {'success': True, 'message': 'Account deleted'}
 
 
 @app.route('/api/transactions/transaction', methods=['GET', 'POST'])
