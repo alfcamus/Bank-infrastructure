@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+
+    <div class="container mt-5" style="max-width: 600px;">
+        <h2 class="mb-4">Transfer</h2>
+        <form id="transfer_form">
+            <div class="form-group">
+                <label for="transfer_from">From</label>
+                <select class="form-control" id="transfer_from">
+                    <option selected disabled>Select from...</option>
+                    {% for account in accounts %}
+                    <option class="dropdown-item d-flex justify-content-between align-items-center" data-account-id="{{account.id}}">
+                        <span>{{ account.account_type }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ account.balance }}</span>
+                    </option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+            <div class="form-group">
+                <label for="transfer_to">To</label>
+                <select class="form-control" id="transfer_to">
+                    <option selected disabled>Select to...</option>
+                    {% for account in accounts %}
+                    <option class="dropdown-item d-flex justify-content-between align-items-center" data-account-id="{{account.id}}">
+                        <span>{{ account.account_type }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ account.balance }}</span>
+                    </option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Create</button>
+        </form>
+    </div>
+
+    <script>
+        async function getCookie(name) {
+            try {
+                const cookie = await cookieStore.get(name);
+                return cookie ? cookie.value : null;
+            } catch (error) {
+                console.error('Cookie Store API not supported:', error);
+                return getCookies()[name]; // Fallback
+            }
+        }
+
+        document.getElementById('transfer_form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const transfer_from = document.getElementById('transfer_from');
+            const account_id_from = transfer_from.options[transfer_from.selectedIndex].attributes.getNamedItem('data-account-id').value;
+            const user_token = await getCookie('user_token');
+            try {
+
+                // Prepare data to send
+                const formData = {
+                    account_type: account_type,
+                    login: JSON.parse(atob(user_token)).data.client.login
+                };
+                // Send to Flask backend
+                const response = await fetch('/create-new-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.redirect_url) {
+                    window.location.href = result.redirect_url; // Perform redirect
+                } else {
+                    alert('Error: ' + (result.message || 'Create account failed'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

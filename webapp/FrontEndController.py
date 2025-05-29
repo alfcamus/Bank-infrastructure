@@ -39,7 +39,6 @@ def logged():
         accounts = user_token_json['data']['client']['accounts']
         return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_based), 200
 
-
 @front_app.route('/login', methods=['POST'])
 def login():
     login_from_data = request.get_json()['login']
@@ -67,6 +66,17 @@ def login():
 def registration():
     return render_template('registration.html'), 200
 
+@front_app.route('/transfer/own')
+def own_transfer():
+    user_token_based = request.cookies.get('user_token')
+    user_token = base64.b64decode(user_token_based).decode('utf-8')
+    user_token_json = json.loads(user_token)
+    accounts = user_token_json['data']['client']['accounts']
+    return render_template('own_transfer.html', accounts=accounts), 200
+
+@front_app.route('/transfer/external')
+def external_transfer():
+    return render_template('external_transfer.html'), 200
 
 @front_app.route('/new-account')
 def new_account():
