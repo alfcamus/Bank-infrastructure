@@ -168,7 +168,7 @@ def transactions():
         data = request.get_json()
         transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
-
+    
 
 # Error handler
 @app.errorhandler(404)
