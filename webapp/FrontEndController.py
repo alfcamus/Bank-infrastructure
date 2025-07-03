@@ -1,3 +1,4 @@
+from numbers import Number
 from flask import Flask, render_template, request, url_for, jsonify
 import requests
 import logging
@@ -67,7 +68,7 @@ def registration():
     return render_template('registration.html'), 200
 
 @front_app.route('/transfer/own')
-def own_transfer():
+def own_transfer_render():
     user_token_based = request.cookies.get('user_token')
     user_token = base64.b64decode(user_token_based).decode('utf-8')
     user_token_json = json.loads(user_token)
@@ -113,6 +114,47 @@ def create_new_account():
             "message": str(e)
         }), 500
 
+
+
+@front_app.route('/own-transaction', methods=['POST'])
+def own_transfer():
+    try:
+        accepted_data = request.get_json()
+        user_token_based = request.cookies.get('user_token')
+        user_token = base64.b64decode(user_token_based).decode('utf-8')
+        user_token_json = json.loads(user_token)
+        accounts = user_token_json["data"]["client"]["accounts"]
+        for i in accounts:
+            if i["id"] == accepted_data["source_account_id"]:
+                print(i['balance'])
+                print(accepted_data["value"])
+                if Number(i["balance"]) < Number(accepted_data["value"]):
+                    print("hej")
+                    raise Exception("Not enough funds")
+        print(json.dumps(accepted_data))
+        transaction_url = "http://localhost:5000/api/transactions/transaction"
+        transaction_credit = {
+            "source_account": accepted_data["source_account_id"],
+            "transfer_type": "CREDIT",
+            "value": accepted_data["value"]
+            }
+        transaction_debit = {
+            "source_account": accepted_data["target_account_id"],
+            "transfer_type": "DEBIT",
+            "value": accepted_data["value"]
+            }
+        transaction_credit_response = requests.post(transaction_url, json = transaction_credit)
+        transaction_debit_response = requests.post(transaction_url, json = transaction_debit)
+        if transaction_credit_response.ok and  transaction_debit_response.ok:
+            return jsonify({
+                "status": "success",
+                "redirect_url": url_for('logged')
+            }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 @front_app.route('/register', methods=["POST"])
 def register():

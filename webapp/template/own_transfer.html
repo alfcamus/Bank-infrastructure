@@ -38,8 +38,12 @@
                     </option>
                     {% endfor %}
                 </select>
-                
             </div>
+             <div class="mb-3">
+                        <label for="value" class="form-label">Value</label>
+                        <input type="number" class="form-control" id="value" name="value"
+       placeholder="Enter amount" step="any">
+                    </div>
             <button type="submit" class="btn btn-primary w-100">Create</button>
         </form>
     </div>
@@ -60,17 +64,22 @@
 
             // Get form values
             const transfer_from = document.getElementById('transfer_from');
-            const account_id_from = transfer_from.options[transfer_from.selectedIndex].attributes.getNamedItem('data-account-id').value;
+            const source_account = transfer_from.options[transfer_from.selectedIndex].attributes.getNamedItem('data-account-id').value;
+             const transfer_to = document.getElementById('transfer_to');
+            const target_account = transfer_to.options[transfer_to.selectedIndex].attributes.getNamedItem('data-account-id').value;
             const user_token = await getCookie('user_token');
+            const value_element = document.getElementById("value");
+            const value = value_element.value;
             try {
 
                 // Prepare data to send
                 const formData = {
-                    account_type: account_type,
-                    login: JSON.parse(atob(user_token)).data.client.login
+                    source_account_id: source_account,
+                    target_account_id: target_account,
+                    value: value
                 };
                 // Send to Flask backend
-                const response = await fetch('/create-new-account', {
+                const response = await fetch('/own-transaction', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
