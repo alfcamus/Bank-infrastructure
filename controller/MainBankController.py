@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# TODO for frontend app: add simple authentication in backend ->
+# TODO for frontend appsimple authentication in backend ->
 # use sha-256 to hash password on registration
 # main id: client id, but for purpose of registration generate login
 # Helper decorator for JSON APIs
@@ -166,9 +166,10 @@ def transactions():
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
+        print(data)
         transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
-
+        account_service.math_transaction(transaction)
 
 # Error handler
 @app.errorhandler(404)
