@@ -65,7 +65,7 @@
             // Get form values
             const transfer_from = document.getElementById('transfer_from');
             const source_account = transfer_from.options[transfer_from.selectedIndex].attributes.getNamedItem('data-account-id').value;
-             const transfer_to = document.getElementById('transfer_to');
+            const transfer_to = document.getElementById('transfer_to');
             const target_account = transfer_to.options[transfer_to.selectedIndex].attributes.getNamedItem('data-account-id').value;
             const user_token = await getCookie('user_token');
             const value_element = document.getElementById("value");

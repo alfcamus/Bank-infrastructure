@@ -30,7 +30,8 @@ def logged():
             "username": client_response.json()['data']['client']['name']
         }
         user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
-        return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_b64.decode('utf-8')), 200
+        return render_template('logged.html', accounts=accounts, user=user,
+                               user_token=user_token_b64.decode('utf-8')), 200
     else:
         user_token = base64.b64decode(user_token_based).decode('utf-8')
         user_token_json = json.loads(user_token)
@@ -39,6 +40,7 @@ def logged():
         }
         accounts = user_token_json['data']['client']['accounts']
         return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_based), 200
+
 
 @front_app.route('/login', methods=['POST'])
 def login():
@@ -67,6 +69,7 @@ def login():
 def registration():
     return render_template('registration.html'), 200
 
+
 @front_app.route('/transfer/own')
 def own_transfer_render():
     user_token_based = request.cookies.get('user_token')
@@ -75,9 +78,11 @@ def own_transfer_render():
     accounts = user_token_json['data']['client']['accounts']
     return render_template('own_transfer.html', accounts=accounts), 200
 
+
 @front_app.route('/transfer/external')
 def external_transfer():
     return render_template('external_transfer.html'), 200
+
 
 @front_app.route('/new-account')
 def new_account():
@@ -105,15 +110,12 @@ def create_new_account():
             return jsonify({
                 "status": "success",
                 "redirect_url": url_for('logged')
-                # TODO: retrieve login from response and send to 'frontend'
-                # login: ...
             }), 200
     except Exception as e:
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
-
 
 
 @front_app.route('/own-transaction', methods=['POST'])
@@ -137,15 +139,15 @@ def own_transfer():
             "source_account": accepted_data["source_account_id"],
             "transfer_type": "CREDIT",
             "value": accepted_data["value"]
-            }
+        }
         transaction_debit = {
             "source_account": accepted_data["target_account_id"],
             "transfer_type": "DEBIT",
             "value": accepted_data["value"]
-            }
-        transaction_credit_response = requests.post(transaction_url, json = transaction_credit)
-        transaction_debit_response = requests.post(transaction_url, json = transaction_debit)
-        if transaction_credit_response.ok and  transaction_debit_response.ok:
+        }
+        transaction_credit_response = requests.post(transaction_url, json=transaction_credit)
+        transaction_debit_response = requests.post(transaction_url, json=transaction_debit)
+        if transaction_credit_response.ok and transaction_debit_response.ok:
             return jsonify({
                 "status": "success",
                 "redirect_url": url_for('logged')
@@ -155,6 +157,7 @@ def own_transfer():
             "status": "error",
             "message": str(e)
         }), 500
+
 
 @front_app.route('/register', methods=["POST"])
 def register():
@@ -167,9 +170,7 @@ def register():
         if response.ok:
             return jsonify({
                 "status": "success",
-                "redirect_url": url_for('logged')
-                # TODO: retrieve login from response and send to 'frontend'
-                # login: ...
+                "redirect_url": url_for('logged', login=response.json()['data']['login'])
             }), 200
     except Exception as e:
         return jsonify({
