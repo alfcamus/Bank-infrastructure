@@ -141,10 +141,13 @@ def accounts():
         }
 
     elif request.method == 'PUT':
-        # Update account logic
         data = request.get_json()
-        # Implement your update logic here
-        return {'error': 'Not implemented'}, 501
+        account = Account(
+            id=data['id'],
+            balance=Decimal(data['balance']),
+        )
+        account_service.update_account(account)
+        return {'Success': True}, 202
 
     elif request.method == 'DELETE':
         account_id = request.args.get('id')
