@@ -130,7 +130,7 @@ def own_transfer():
             if i["id"] == accepted_data["source_account_id"]:
                 print(i['balance'])
                 print(accepted_data["value"])
-                if Number(i["balance"]) < Number(accepted_data["value"]):
+                if float(i["balance"]) < float(accepted_data["value"]):
                     print("hej")
                     raise Exception("Not enough funds")
         print(json.dumps(accepted_data))

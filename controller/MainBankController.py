@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from flask import Flask, request, jsonify, render_template
 from functools import wraps
 from service.ClientService import ClientService
@@ -18,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# TODO for frontend app: add simple authentication in backend ->
+# TODO for frontend appsimple authentication in backend ->
 # use sha-256 to hash password on registration
 # main id: client id, but for purpose of registration generate login
 # Helper decorator for JSON APIs
@@ -126,7 +128,7 @@ def accounts():
             id=None,
             created_at=None,
             client_id=data['client_id'],
-            balance=balance,
+            balance=Decimal(balance),
             account_type=data['account_type'],
         )
         print(f"account to create: {account.to_db()}")
@@ -139,10 +141,13 @@ def accounts():
         }
 
     elif request.method == 'PUT':
-        # Update account logic
         data = request.get_json()
-        # Implement your update logic here
-        return {'error': 'Not implemented'}, 501
+        account = Account(
+            id=data['id'],
+            balance=Decimal(data['balance']),
+        )
+        account_service.update_account(account)
+        return {'Success': True}, 202
 
     elif request.method == 'DELETE':
         account_id = request.args.get('id')
@@ -161,13 +166,16 @@ def transactions():
         # Retrieve item 
         transaction_id = request.args.get('id')
         transaction = transaction_service.get_transaction_by_id(transaction_id)
-        return {'account': transaction.to_dict(), 'method': 'GET'}
+        return {'transaction': transaction.to_dict(), 'method': 'GET'}
 
     elif request.method == 'POST':
         # Create item logic
         data = request.get_json()
-        transaction = Transaction(data["source_account"], data["value"], data["transfer_type"], None)
+        print(data)
+        transaction = Transaction(data["source_account"], Decimal(data["value"]), data["transfer_type"], None)
         transaction_service.add_transaction(transaction)
+        account_service.math_transaction(transaction)
+        return {'success': True, 'message': 'Transaction committed'}
 
 
 # Error handler

@@ -9,66 +9,96 @@
 </head>
 
 <body>
-<div class="container mt-5" style="max-width: 600px;">
-    <h2 class="mb-4">Add new account</h2>
-    <form id="account_form">
-        <div class="form-group">
-            <label for="account_type">Choose type of account</label>
-            <select class="form-control" id="account_type">
-                <option selected disabled>Select one...</option>
-                <option>CHECKING</option>
-                <option>CREDIT</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Create</button>
-    </form>
-</div>
 
-<script>
-    async function getCookie(name) {
-        try {
-            const cookie = await cookieStore.get(name);
-            return cookie ? cookie.value : null;
-        } catch (error) {
-            console.error('Cookie Store API not supported:', error);
-            return getCookies()[name]; // Fallback
-        }
-    }
 
-    document.getElementById('account_form').addEventListener('submit', async function (e) {
-        e.preventDefault();
+    <div class="container mt-5" style="max-width: 600px;">
+        <h2 class="mb-4">Transfer</h2>
+        <form id="transfer_form">
+            <div class="form-group">
+                <label for="transfer_from">From</label>
+                <select class="form-control" id="transfer_from">
+                    <option selected disabled>Select from...</option>
+                    {% for account in accounts %}
+                    <option class="dropdown-item d-flex justify-content-between align-items-center" data-account-id="{{account.id}}">
+                        <span>{{ account.account_type }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ account.balance }}</span>
+                    </option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+            <div class="form-group">
+                <label for="transfer_to">To</label>
+                <select class="form-control" id="transfer_to">
+                    <option selected disabled>Select to...</option>
+                    {% for account in accounts %}
+                    <option class="dropdown-item d-flex justify-content-between align-items-center" data-account-id="{{account.id}}">
+                        <span>{{ account.account_type }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ account.balance }}</span>
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+             <div class="mb-3">
+                        <label for="value" class="form-label">Value</label>
+                        <input type="number" class="form-control" id="value" name="value"
+       placeholder="Enter amount" step="any">
+                    </div>
+            <button type="submit" class="btn btn-primary w-100">Create</button>
+        </form>
+    </div>
 
-        // Get form values
-        const account_type = document.getElementById('account_type').value;
-        const user_token = await getCookie('user_token');
-        try {
-
-            // Prepare data to send
-            const formData = {
-                account_type : account_type,
-                login : JSON.parse(atob(user_token)).data.client.login
-            };
-            // Send to Flask backend
-            const response = await fetch('/create-new-account', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.redirect_url) {
-                window.location.href = result.redirect_url; // Perform redirect
-            } else {
-                alert('Error: ' + (result.message || 'Create account failed'));
+    <script>
+        async function getCookie(name) {
+            try {
+                const cookie = await cookieStore.get(name);
+                return cookie ? cookie.value : null;
+            } catch (error) {
+                console.error('Cookie Store API not supported:', error);
+                return getCookies()[name]; // Fallback
             }
-        } catch (error) {
-            console.error('Error:', error);
         }
-    });
-</script>
+
+        document.getElementById('transfer_form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const transfer_from = document.getElementById('transfer_from');
+            const source_account = transfer_from.options[transfer_from.selectedIndex].attributes.getNamedItem('data-account-id').value;
+            const transfer_to = document.getElementById('transfer_to');
+            const target_account = transfer_to.options[transfer_to.selectedIndex].attributes.getNamedItem('data-account-id').value;
+            const user_token = await getCookie('user_token');
+            const value_element = document.getElementById("value");
+            const value = value_element.value;
+            try {
+
+                // Prepare data to send
+                const formData = {
+                    source_account_id: source_account,
+                    target_account_id: target_account,
+                    value: value
+                };
+                // Send to Flask backend
+                const response = await fetch('/own-transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.redirect_url) {
+                    window.location.href = result.redirect_url; // Perform redirect
+                } else {
+                    alert('Error: ' + (result.message || 'Create account failed'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -1,5 +1,8 @@
+import decimal
+
+
 class Account:
-    def __init__(self, id: str, balance: float, account_type, created_at, client_id):
+    def __init__(self, id: str, balance: decimal.Decimal, account_type, created_at, client_id):
         self.id = id
         self.balance = balance
         self.account_type = account_type
@@ -11,6 +14,6 @@ class Account:
 
     def to_db(self):
         return {'balance': self.balance, "account_type": self.account_type, "client_id": self.client_id}
-    
+
     def to_dict(self):
         return {'balance': self.balance, "id": self.id, "account_type": self.account_type}

@@ -1,5 +1,8 @@
+import decimal
+
+
 class Transaction:
-    def __init__(self, source_account, value, transfer_type, transaction_id):
+    def __init__(self, source_account, value: decimal.Decimal, transfer_type, transaction_id):
         self.source_account = source_account
         self.value = value
         self.transfer_type = transfer_type

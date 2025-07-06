@@ -1,8 +1,7 @@
-from service.BaseService import BaseService
 from model.Transaction import Transaction
 from model.TransferType import TransferType  # Assuming you have this enum
-import uuid
-from datetime import datetime
+from service.BaseService import BaseService
+
 
 class TransactionService(BaseService):
     def __init__(self):
@@ -40,7 +39,7 @@ class TransactionService(BaseService):
             transaction_id=x["transaction_id"],
             source_account=x["source_account"],
             value=x["value"],
-            transaction_type=TransferType(x["transaction_type"]),
+            transaction_type=TransferType(x["transfer_type"]),
             created_at=x["created_at"]
         )
     
