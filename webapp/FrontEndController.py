@@ -81,7 +81,11 @@ def own_transfer_render():
 
 @front_app.route('/transfer/external')
 def external_transfer():
-    return render_template('external_transfer.html'), 200
+    user_token_based = request.cookies.get('user_token')
+    user_token = base64.b64decode(user_token_based).decode('utf-8')
+    user_token_json = json.loads(user_token)
+    accounts = user_token_json['data']['client']['accounts']
+    return render_template('external_transfer.html', accounts=accounts), 200
 
 
 @front_app.route('/new-account')
@@ -159,6 +163,30 @@ def own_transfer():
         }), 500
 
 
+@front_app.route('/get-checking-account', methods = ['POST'])
+def get_checking_account():
+    accepted_data = request.get_json()
+    login = accepted_data['login']
+    host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
+    client_response = requests.get(host)
+    if client_response.status_code != 200:
+        return jsonify({
+            "status": "error",
+            "message": "no user have been found"
+        }), 500
+    accounts = client_response.json()['data']['client']['accounts']
+    checking_ids = [ x['id'] for x in accounts if x['account_type'] == 'CHECKING' ]
+    if len(checking_ids) > 0:
+        return jsonify({
+                "id": checking_ids[0],
+            }), 200
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "no checking accound have been found"
+        }), 500
+ 
+    
 @front_app.route('/register', methods=["POST"])
 def register():
     try:
