@@ -79,7 +79,7 @@
                     value: value
                 };
                 // Send to Flask backend
-                const response = await fetch('/own-transaction', {
+                const response = await fetch('/make-transaction', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
