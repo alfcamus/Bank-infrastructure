@@ -122,8 +122,8 @@ def create_new_account():
         }), 500
 
 
-@front_app.route('/own-transaction', methods=['POST'])
-def own_transfer():
+@front_app.route('/make-transaction', methods=['POST'])
+def make_transfer():
     try:
         accepted_data = request.get_json()
         user_token_based = request.cookies.get('user_token')
