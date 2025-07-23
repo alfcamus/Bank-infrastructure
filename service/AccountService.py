@@ -1,3 +1,5 @@
+import decimal
+
 from service.BaseService import BaseService
 from model.Account import Account
 from model.Transaction import Transaction
@@ -33,16 +35,17 @@ class AccountService(BaseService):
     def math_transaction(self, transaction: Transaction):
         print("calculating balance")
         account = self.get_account_by_account_id(transaction.source_account)
+        balance = account.balance
         if transaction.transfer_type == "CREDIT":
-            account.balance -= transaction.value
+            balance -= transaction.value
         else:
-            account.balance += transaction.value
-        self.update_account(account)
+            balance += transaction.value
+        self.update_account(account.id, balance)
         print("finished calculating balance")
 
-    def update_account(self, account: Account):
-        print(f"updating account {account.id} with balance {account.balance}")
-        query = f"""UPDATE accounts SET balance = {account.balance} WHERE account_id = '{account.id}'"""
+    def update_account(self, id: str, balance: decimal.Decimal):
+        print(f"updating account {id} with balance {balance}")
+        query = f"""UPDATE accounts SET balance = {balance} WHERE account_id = '{id}'"""
         self.db.execute_query(query)
 
     def delete_account(self, client_id):
