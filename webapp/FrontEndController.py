@@ -20,26 +20,16 @@ def home():
 
 @front_app.route('/logged')
 def logged():
-    user_token_based = request.cookies.get('user_token')
-    if user_token_based is None:
-        login = request.args.get("login")
-        host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
-        client_response = requests.get(host)
-        accounts = client_response.json()['data']['client']['accounts']
-        user = {
-            "username": client_response.json()['data']['client']['name']
-        }
-        user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
-        return render_template('logged.html', accounts=accounts, user=user,
-                               user_token=user_token_b64.decode('utf-8')), 200
-    else:
-        user_token = base64.b64decode(user_token_based).decode('utf-8')
-        user_token_json = json.loads(user_token)
-        user = {
-            "username": user_token_json['data']['client']['name']
-        }
-        accounts = user_token_json['data']['client']['accounts']
-        return render_template('logged.html', accounts=accounts, user=user, user_token=user_token_based), 200
+    login = request.args.get("login")
+    host = f"http://localhost:5000/api/clients/client?by_login=True&login={login}"
+    client_response = requests.get(host)
+    accounts = client_response.json()['data']['client']['accounts']
+    user = {
+        "username": client_response.json()['data']['client']['name']
+    }
+    user_token_b64 = base64.b64encode(json.dumps(client_response.json()).encode('utf-8'))
+    return render_template('logged.html', accounts=accounts, user=user,
+                           user_token=user_token_b64.decode('utf-8')), 200
 
 
 @front_app.route('/login', methods=['POST'])
@@ -113,7 +103,7 @@ def create_new_account():
         if response.ok:
             return jsonify({
                 "status": "success",
-                "redirect_url": url_for('logged')
+                "redirect_url": url_for('logged', login=accepted_data['login'])
             }), 200
     except Exception as e:
         return jsonify({
@@ -154,7 +144,7 @@ def make_transfer():
         if transaction_credit_response.ok and transaction_debit_response.ok:
             return jsonify({
                 "status": "success",
-                "redirect_url": url_for('logged')
+                "redirect_url": url_for('logged', login=user_token_json["data"]["client"]["login"])
             }), 200
     except Exception as e:
         return jsonify({
@@ -163,7 +153,7 @@ def make_transfer():
         }), 500
 
 
-@front_app.route('/get-checking-account', methods = ['POST'])
+@front_app.route('/get-checking-account', methods=['POST'])
 def get_checking_account():
     accepted_data = request.get_json()
     login = accepted_data['login']
@@ -175,18 +165,18 @@ def get_checking_account():
             "message": "no user have been found"
         }), 500
     accounts = client_response.json()['data']['client']['accounts']
-    checking_ids = [ x['id'] for x in accounts if x['account_type'] == 'CHECKING' ]
+    checking_ids = [x['id'] for x in accounts if x['account_type'] == 'CHECKING']
     if len(checking_ids) > 0:
         return jsonify({
-                "id": checking_ids[0],
-            }), 200
+            "id": checking_ids[0],
+        }), 200
     else:
         return jsonify({
             "status": "error",
             "message": "no checking accound have been found"
         }), 500
- 
-    
+
+
 @front_app.route('/register', methods=["POST"])
 def register():
     try:

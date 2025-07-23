@@ -142,11 +142,7 @@ def accounts():
 
     elif request.method == 'PUT':
         data = request.get_json()
-        account = Account(
-            id=data['id'],
-            balance=Decimal(data['balance']),
-        )
-        account_service.update_account(account)
+        account_service.update_account(data['id'], data['balance'])
         return {'Success': True}, 202
 
     elif request.method == 'DELETE':
