@@ -1,0 +1,26 @@
+# A .prettierrc.yml file for JavaScript projects
+
+# Use single quotes instead of double quotes
+singleQuote: true
+
+# Add a semicolon at the end of every statement
+semi: false
+
+# Print a trailing comma wherever it is valid in ES5 (objects, arrays, etc.)
+trailingComma: all
+
+# Specify the line length that the printer will wrap on.
+printWidth: 80
+
+# The number of spaces per indentation-level
+tabWidth: 2
+
+# Use spaces instead of tabs
+useTabs: false
+
+# Include parentheses around a sole arrow function parameter
+arrowParens: always
+
+# Place the closing bracket of JSX/HTML elements on a new line
+# rather than on the same line as the last attribute.
+bracketSameLine: false
